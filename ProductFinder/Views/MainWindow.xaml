@@ -1,0 +1,214 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:models="clr-namespace:ProductFinder.Models" x:Class="ProductFinder.Views.MainWindow" Title="Product Finder" Width="1320" Height="920" MinWidth="1050" MinHeight="760" WindowStartupLocation="CenterScreen" Background="#F4F6FA" Foreground="#17243A" FontFamily="Segoe UI" FontSize="14" UseLayoutRounding="True" SnapsToDevicePixels="True"><Grid Margin="24,20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="2*" MinHeight="152"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="3*" MinHeight="170"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" VerticalAlignment="Center"/>
+            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                <StackPanel Orientation="Horizontal"><Border Background="White" BorderBrush="{StaticResource Line}" BorderThickness="1" CornerRadius="8" Padding="12,8">
+                    <StackPanel Orientation="Horizontal">
+                        <Ellipse Width="7" Height="7" Fill="#7B879B" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="CatalogStatusText" Text="{Binding DisplayStatus, Mode=OneWay}" Style="{StaticResource SecondaryText}" ToolTip="{Binding CatalogDetails, Mode=OneWay}" TextTrimming="CharacterEllipsis" MaxWidth="340"/>
+                    </StackPanel>
+                </Border>
+                <Button Content="Повторить" Command="{Binding ReloadCatalogCommand, Mode=OneWay}" Visibility="{Binding HasCatalogError, Converter={StaticResource BooleanToVisibility}, Mode=OneWay}" Style="{StaticResource SoftButton}" Margin="8,0,0,0" Padding="10,5" MinHeight="34"/><Button Content="Отменить" Command="{Binding CancelOperationCommand, Mode=OneWay}" Visibility="{Binding IsProcessing, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}" Style="{StaticResource DangerButton}" Margin="8,0,0,0" Padding="10,5" MinHeight="34"/></StackPanel><ProgressBar x:Name="CatalogProgressBar" Height="3" Margin="0,6,0,0" Minimum="0" Maximum="100" Value="{Binding DisplayProgress, Mode=OneWay}" Visibility="{Binding IsActivityVisible, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}" Foreground="{StaticResource Accent}" Background="#E4EBF7" AutomationProperties.Name="Загрузка каталога" IsIndeterminate="{Binding IsActivityIndeterminate, Mode=OneWay}"/>
+            </StackPanel>
+        </Grid>
+
+        <Border Grid.Row="1" Style="{StaticResource Card}" Padding="20,12" Margin="0,0,0,16">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Text="Поиск по каталогу" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Grid.Column="1" Text="{x:Static models:MatchQuality.LegendText}" Style="{StaticResource SecondaryText}"/>
+                </Grid>
+                <Grid Grid.Row="1">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Grid Margin="0,0,12,0">
+                        <TextBox x:Name="SearchTextBox" MinHeight="48" Padding="42,11,12,11" AutomationProperties.Name="Поиск по каталогу" Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}" MaxLength="4000"><TextBox.InputBindings><KeyBinding Key="Return" Command="{Binding SearchCommand, Mode=OneWay}"/></TextBox.InputBindings></TextBox>
+                        <Path Data="{StaticResource SearchIcon}" Stroke="#64748B" StrokeThickness="1.7" Width="19" Height="19" Stretch="Uniform" Margin="14,0,0,0" HorizontalAlignment="Left" VerticalAlignment="Center" IsHitTestVisible="False"/>
+                        <TextBlock Text="Введите артикул, название или строку из заявки" Margin="43,0,12,0" Foreground="{StaticResource Muted}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" IsHitTestVisible="False">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding Text, ElementName=SearchTextBox}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                    <Button x:Name="SearchButton" Grid.Column="1" Width="164" Style="{StaticResource PrimaryButton}" AutomationProperties.Name="Найти товар" Command="{Binding SearchCommand, Mode=OneWay}">
+                        <StackPanel Orientation="Horizontal">
+                            <Path Data="{StaticResource SearchIcon}" Style="{StaticResource ButtonIcon}"/>
+                            <TextBlock Text="Найти товар" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="2" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid Margin="20,14,20,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Результаты поиска" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource CountBadge}">
+                            <TextBlock Text="{Binding Items.Count, ElementName=SearchResultsGrid, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Accent}"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="{Binding SearchStatus, Mode=OneWay}" Style="{StaticResource SecondaryText}"/>
+                </Grid>
+                <Grid Grid.Row="1" Margin="10,0,10,10">
+                    <DataGrid x:Name="SearchResultsGrid" RowStyle="{StaticResource MatchRowStyle}" IsReadOnly="True" SelectionMode="Single" AutomationProperties.Name="Результаты поиска" ItemsSource="{Binding SearchResults, Mode=OneWay}" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}" MouseDoubleClick="SearchResultsGrid_MouseDoubleClick">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Артикул" Binding="{Binding Article, Mode=OneWay}" Width="170" ElementStyle="{StaticResource ArticleText}"/>
+                            <DataGridTextColumn Header="Название товара" Binding="{Binding Name, Mode=OneWay}" Width="*" MinWidth="240" ElementStyle="{StaticResource CellText}"/>
+                            <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer, Mode=OneWay}" Width="165" ElementStyle="{StaticResource CellText}"/>
+                            <DataGridTemplateColumn Header="Совпадение" Width="150" IsReadOnly="True" SortMemberPath="Score" CellTemplate="{StaticResource MatchCellTemplate}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Margin="16,38,16,0" VerticalAlignment="Center" HorizontalAlignment="Center" IsHitTestVisible="False">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasItems, ElementName=SearchResultsGrid, Mode=OneWay}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <TextBlock Text="Пока ничего не найдено" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="Введите запрос или уточните условия поиска" Style="{StaticResource SecondaryText}" Margin="0,6,0,0" HorizontalAlignment="Center"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="3" Style="{StaticResource Card}" Background="#F9FBFF" Padding="18,14" Margin="0,16,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/><ColumnDefinition Width="76"/><ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Добавить по артикулу" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,18,0"/>
+                <TextBox x:Name="ManualArticleTextBox" Grid.Column="1" Margin="0,0,16,0" FontFamily="Consolas" Background="White" ToolTip="Точный артикул товара" AutomationProperties.Name="Артикул товара" Text="{Binding ManualArticle, UpdateSourceTrigger=PropertyChanged}" MaxLength="256" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}"><TextBox.InputBindings><KeyBinding Key="Return" Command="{Binding ManualAddCommand, Mode=OneWay}"/></TextBox.InputBindings></TextBox>
+                <TextBlock Grid.Column="2" Text="Кол-во" Style="{StaticResource SecondaryText}" Margin="0,0,10,0"/>
+                <TextBox x:Name="ManualQuantityTextBox" Grid.Column="3" Text="{Binding ManualQuantity, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Background="White" AutomationProperties.Name="Количество товара" MaxLength="6" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}"><TextBox.InputBindings><KeyBinding Key="Return" Command="{Binding ManualAddCommand, Mode=OneWay}"/></TextBox.InputBindings></TextBox>
+                <Button x:Name="ManualAddButton" Grid.Column="4" Margin="12,0,0,0" Style="{StaticResource SoftButton}" AutomationProperties.Name="Добавить товар" Command="{Binding ManualAddCommand, Mode=OneWay}">
+                    <StackPanel Orientation="Horizontal">
+                        <Path Data="{StaticResource AddIcon}" Style="{StaticResource ButtonIcon}"/>
+                        <TextBlock Text="Добавить" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="4" Style="{StaticResource Card}">
+            <Grid>
+                <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                <Grid Margin="20,14,20,12">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Список для выгрузки" Style="{StaticResource SectionTitle}"/>
+                        <Border Style="{StaticResource CountBadge}">
+                            <TextBlock Text="{Binding Items.Count, ElementName=ExportItemsGrid, Mode=OneWay}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Accent}"/>
+                        </Border>
+                    </StackPanel>
+                    <TextBlock Grid.Column="1" Text="Двойной клик — выбрать другой вариант" Style="{StaticResource SecondaryText}"/>
+                </Grid>
+                <Grid Grid.Row="1" Margin="10,0,10,10">
+                    <DataGrid x:Name="ExportItemsGrid" RowStyle="{StaticResource MatchRowStyle}" AutomationProperties.Name="Список товаров для выгрузки" ItemsSource="{Binding ExportItems, Mode=OneWay}" IsEnabled="{Binding CanEditExport, Mode=OneWay}" MouseDoubleClick="ExportItemsGrid_MouseDoubleClick" SelectionChanged="ExportItemsGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Артикул" Binding="{Binding Article, Mode=OneWay}" Width="130" IsReadOnly="True" ElementStyle="{StaticResource ArticleText}"/>
+                            <DataGridTextColumn Header="Кол-во" Binding="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=LostFocus, ValidatesOnExceptions=True}" Width="76" ElementStyle="{StaticResource QuantityText}" EditingElementStyle="{StaticResource QuantityEditor}"/>
+                            <DataGridTextColumn Header="Название из базы" Binding="{Binding Name, Mode=OneWay}" Width="2*" MinWidth="200" IsReadOnly="True" ElementStyle="{StaticResource CellText}"/>
+                            <DataGridTemplateColumn Header="Совпадение" Width="140" IsReadOnly="True" SortMemberPath="Score" CellTemplate="{StaticResource MatchCellTemplate}"/>
+                            <DataGridTextColumn Header="Строка из заявки" Binding="{Binding SourceText, Mode=OneWay}" Width="*" MinWidth="140" IsReadOnly="True" ElementStyle="{StaticResource CellText}"/>
+                            <DataGridTextColumn Header="Производитель" Binding="{Binding Manufacturer, Mode=OneWay}" Width="130" IsReadOnly="True" ElementStyle="{StaticResource CellText}"/>
+                            <DataGridTemplateColumn Header="Дополнение" Width="105" IsReadOnly="True">
+        <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate>
+                <Button Content="Допарсить" Click="ParseEtmButton_Click" Style="{StaticResource SoftButton}"
+                        Margin="5,4" MinHeight="32" Padding="8,4"
+                        Visibility="{Binding CanParseEtm, Mode=OneWay, Converter={StaticResource BooleanToVisibility}}"
+                        IsEnabled="{Binding DataContext.CanUseCatalog, RelativeSource={RelativeSource AncestorType={x:Type Window}}, Mode=OneWay}"
+                        AutomationProperties.Name="Допарсить товар на ЭТМ"/>
+            </DataTemplate>
+        </DataGridTemplateColumn.CellTemplate>
+    </DataGridTemplateColumn>
+</DataGrid.Columns>
+                    </DataGrid>
+                    <StackPanel Margin="16,38,16,0" VerticalAlignment="Center" HorizontalAlignment="Center" Orientation="Horizontal" IsHitTestVisible="False">
+                        <StackPanel.Style>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding HasItems, ElementName=ExportItemsGrid, Mode=OneWay}" Value="False">
+                                        <Setter Property="Visibility" Value="Visible"/>
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </StackPanel.Style>
+                        <Border Width="36" Height="36" Background="{StaticResource SoftAccent}" CornerRadius="9" VerticalAlignment="Center" Margin="0,0,12,0">
+                            <Path Data="{StaticResource DocumentIcon}" Stroke="{StaticResource Accent}" StrokeThickness="1.5" Width="17" Height="21" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Заявка пока пустая" FontWeight="SemiBold" HorizontalAlignment="Left"/>
+                        <TextBlock Text="Добавьте товары из поиска, вставьте текст или импортируйте Excel" Style="{StaticResource SecondaryText}" Margin="0,5,0,0" HorizontalAlignment="Left"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="5" Margin="0,16,0,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="SmartInsertButton" Style="{StaticResource SoftButton}" Margin="0,0,10,0" AutomationProperties.Name="Вставить заявку" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}" Click="SmartInsertButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource PasteIcon}" Style="{StaticResource ButtonIcon}"/>
+                    <TextBlock Text="Вставить заявку" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="ImportExcelButton" Grid.Column="1" AutomationProperties.Name="Импорт Excel" IsEnabled="{Binding CanUseCatalog, Mode=OneWay}" Click="ImportExcelButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource ImportIcon}" Style="{StaticResource ButtonIcon}"/>
+                    <TextBlock Text="Импорт Excel" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="DeleteSelectedButton" Grid.Column="3" Style="{StaticResource DangerButton}" Margin="12,0,10,0" AutomationProperties.Name="Удалить выбранное" Command="{Binding DeleteSelectedCommand, Mode=OneWay}">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource DeleteIcon}" Style="{StaticResource ButtonIcon}"/>
+                    <TextBlock Text="Удалить выбранное" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+            <Button x:Name="ExportExcelButton" Grid.Column="4" Style="{StaticResource PrimaryButton}" AutomationProperties.Name="Выгрузить в Excel" IsEnabled="{Binding CanExport, Mode=OneWay}" Click="ExportExcelButton_Click">
+                <StackPanel Orientation="Horizontal">
+                    <Path Data="{StaticResource ExportIcon}" Style="{StaticResource ButtonIcon}"/>
+                    <TextBlock Text="Выгрузить в Excel" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Window>

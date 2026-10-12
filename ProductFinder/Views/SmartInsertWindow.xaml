@@ -1,0 +1,31 @@
+<Window x:Class="ProductFinder.Views.SmartInsertWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Вставка заявки из текста" Width="840" Height="720" MinWidth="680" MinHeight="560"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False" Background="#F4F6FA"
+        Foreground="#17243A" FontFamily="Segoe UI" FontSize="14">
+    <Grid Margin="24">
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
+        <Grid Margin="0,0,0,16">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+            <StackPanel>
+                <TextBlock Text="Вставить заявку" FontSize="24" FontWeight="SemiBold"/>
+                <TextBlock Text="Текст письма, список товаров или скопированная таблица" Style="{StaticResource SecondaryText}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+            <Button Grid.Column="1" Content="Из буфера" Click="Paste_Click" Margin="12,0,0,0" VerticalAlignment="Center"/>
+        </Grid>
+        <TextBox x:Name="RequestTextBox" Grid.Row="1" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" AcceptsTab="True" TextWrapping="Wrap" VerticalContentAlignment="Top" VerticalScrollBarVisibility="Auto" MaxLength="2000000" AutomationProperties.Name="Текст заявки"/>
+        <StackPanel Grid.Row="2" Margin="0,16,0,0">
+            <TextBlock Text="Режим распознавания" Style="{StaticResource SecondaryText}" Margin="0,0,0,6"/>
+            <ComboBox ItemsSource="{Binding Modes, Mode=OneWay}" DisplayMemberPath="Label" SelectedValuePath="Value" SelectedValue="{Binding Mode, Mode=TwoWay}" MinHeight="44" Padding="10,6"/>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Margin="0,12,0,0">
+            <CheckBox Content="Спрашивать вариант при неуверенном совпадении по названию" IsChecked="{Binding AskForWeakMatch, Mode=TwoWay}" IsEnabled="{Binding CanAskForWeakMatch, Mode=OneWay}" MinHeight="32" VerticalContentAlignment="Center" Padding="4,6"/>
+            <CheckBox Content="В режиме «Только артикулы» добавлять ненайденные строки" IsChecked="{Binding KeepMissing, Mode=TwoWay}" IsEnabled="{Binding CanKeepMissing, Mode=OneWay}" MinHeight="32" VerticalContentAlignment="Center" Padding="4,6"/>
+        </StackPanel>
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="Отмена" IsCancel="True" Margin="0,0,10,0"/>
+            <Button Content="Разобрать и добавить" IsEnabled="{Binding CanAccept, Mode=OneWay}" Style="{StaticResource PrimaryButton}" Click="Confirm_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
